@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Blockbound — Your Offline Block Adventure</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --sky: #83c9e8;
+      --ink: #17231b;
+      --paper: #f3edda;
+      --grass: #65a844;
+      --grass-dark: #3b742f;
+      --wood: #9c6037;
+      --stone: #727b7a;
+      --card: #fffaf0;
+      --shadow: 0 5px 0 rgb(23 35 27 / 22%);
+    }
+
+    * { box-sizing: border-box; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      margin: 0;
+      color: var(--ink);
+      background: var(--paper);
+      font-family: "Trebuchet MS", system-ui, sans-serif;
+      line-height: 1.55;
+    }
+
+    button, input, select { font: inherit; }
+
+    .pixel-border {
+      border: 3px solid var(--ink);
+      box-shadow: var(--shadow);
+    }
+
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 5;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      padding: .8rem clamp(1rem, 5vw, 4rem);
+      background: var(--paper);
+      border-bottom: 3px solid var(--ink);
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: .65rem;
+      color: var(--ink);
+      font-weight: 1000;
+      letter-spacing: .04em;
+      text-decoration: none;
+    }
+
+    .brand-block {
+      width: 30px;
+      height: 30px;
+      background: linear-gradient(#73b749 0 35%, #81502e 35%);
+      border: 3px solid var(--ink);
+      image-rendering: pixelated;
+    }
+
+    nav { display: flex; align-items: center; gap: 1rem; }
+
+    nav a {
+      color: var(--ink);
+      font-weight: 800;
+      text-decoration: none;
+    }
+
+    nav a:hover { color: var(--grass-dark); }
+
+    .button {
+      display: inline-block;
+      padding: .7rem 1rem;
+      color: white;
+      background: var(--grass-dark);
+      border: 3px solid var(--ink);
+      box-shadow: 0 4px 0 var(--ink);
+      font-weight: 900;
+      text-decoration: none;
+      cursor: pointer;
+    }
+
+    .button:hover { transform: translateY(2px); box-shadow: 0 2px 0 var(--ink); }
+    .button:active { transform: translateY(4px); box-shadow: none; }
+
+    .hero {
+      position: relative;
+      min-height: 440px;
+      overflow: hidden;
+      display: grid;
+      place-items: center;
+      padding: 4rem 1rem 8rem;
+      text-align: center;
+      background:
+        linear-gradient(#83c9e8 0 68%, #b4e17c 68% 76%, #65a844 76%);
+    }
+
+    .hero-content { position: relative; z-index: 1; max-width: 720px; }
+
+    .eyebrow {
+      display: inline-block;
+      padding: .25rem .7rem;
+      background: var(--paper);
+      border: 2px solid var(--ink);
+      font-size: .8rem;
+      font-weight: 900;
+      text-transform: uppercase;
+      letter-spacing: .12em;
+    }
+
+    h1 {
+      margin: .7rem 0;
+      font-size: clamp(2.6rem, 8vw, 5rem);
+      line-height: 1;
+      text-shadow: 4px 4px 0 #f3edda, 7px 7px 0 var(--ink);
+    }
+
+    .hero p { max-width: 560px; margin: 1.3rem auto 1.7rem; font-size: 1.15rem; }
+
+    .sun {
+      position: absolute;
+      top: 12%;
+      right: 14%;
+      width: 68px;
+      height: 68px;
+      background: #ffe66d;
+      border: 4px solid var(--ink);
+      box-shadow: 0 0 0 9px rgb(255 230 109 / 30%);
+    }
+
+    .cloud {
+      position: absolute;
+      top: 25%;
+      left: 13%;
+      width: 105px;
+      height: 28px;
+      background: white;
+      border: 3px solid var(--ink);
+      box-shadow: 20px -17px 0 -3px white, 20px -17px 0 0 var(--ink),
+                  50px 0 0 -3px white, 50px 0 0 0 var(--ink);
+    }
+
+    .hill {
+      position: absolute;
+      bottom: 0;
+      width: 100%;
+      height: 95px;
+      background: repeating-linear-gradient(90deg, #568f3b 0 48px, #4d8536 48px 96px);
+      border-top: 5px solid var(--ink);
+    }
+
+    .hill::before {
+      content: "";
+      position: absolute;
+      inset: 18px 0 0;
+      background: repeating-linear-gradient(90deg, transparent 0 48px, rgb(36 83 36 / 16%) 48px 96px);
+    }
+
+    main { width: min(1050px, 92%); margin: 0 auto; }
+
+    section { padding: 3rem 0; scroll-margin-top: 75px; }
+
+    h2 { margin: 0 0 .4rem; font-size: clamp(1.7rem, 4vw, 2.4rem); }
+    .section-intro { margin: 0 0 1.4rem; color: #48554a; }
+
+    .welcome {
+      display: grid;
+      grid-template-columns: 1.2fr .8fr;
+      gap: 1.5rem;
+      align-items: center;
+    }
+
+    .welcome-card, .tip-card, .item-card, .recipe-card {
+      padding: 1.2rem;
+      background: var(--card);
+    }
+
+    .welcome-card p { margin-bottom: 0; }
+
+    .campfire {
+      min-height: 180px;
+      display: grid;
+      place-items: center;
+      background: #d7edc1;
+      font-size: 4rem;
+      text-align: center;
+    }
+
+    .campfire small { display: block; font-size: .9rem; font-weight: 800; }
+
+    .toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: .7rem;
+      margin: 1rem 0 1.2rem;
+    }
+
+    .toolbar input, .toolbar select {
+      min-width: 190px;
+      flex: 1;
+      padding: .75rem;
+      background: white;
+      border: 3px solid var(--ink);
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1rem;
+    }
+
+    .item-card { min-height: 150px; }
+    .item-card[hidden] { display: none; }
+
+    .item-icon { font-size: 2rem; }
+    .item-card h3, .recipe-card h3 { margin: .25rem 0; }
+    .tag {
+      display: inline-block;
+      padding: .12rem .45rem;
+      background: #dcebcf;
+      border: 1px solid var(--grass-dark);
+      font-size: .75rem;
+      font-weight: 900;
+    }
+
+    .recipes {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 1rem;
+    }
+
+    .recipe-card { display: flex; align-items: center; gap: 1rem; }
+    .recipe-art { min-width: 60px; font-size: 2.3rem; text-align: center; }
+    .recipe-card p { margin: .2rem 0 0; }
+
+    .tip-card {
+      margin-top: 1rem;
+      background: #fff2bd;
+    }
+
+    footer {
+      padding: 1.5rem 1rem;
+      color: white;
+      background: var(--ink);
+      text-align: center;
+    }
+
+    footer p { margin: .3rem; }
+
+    @media (max-width: 700px) {
+      header { align-items: flex-start; }
+      nav { flex-wrap: wrap; justify-content: flex-end; gap: .5rem .8rem; }
+      nav a { font-size: .9rem; }
+      .welcome, .grid, .recipes { grid-template-columns: 1fr; }
+      .hero { min-height: 390px; }
+      .sun { right: 8%; width: 48px; height: 48px; }
+      .cloud { left: 8%; transform: scale(.75); transform-origin: left; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      html { scroll-behavior: auto; }
+      *, *::before, *::after { transition-duration: .01ms !important; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <a class="brand" href="#home" aria-label="Blockbound home">
+      <span class="brand-block" aria-hidden="true"></span>
+      BLOCKBOUND
+    </a>
+    <nav aria-label="Main navigation">
+      <a href="#guide">Field guide</a>
+      <a href="#crafting">Crafting</a>
+      <a href="#tip">Survival tip</a>
+    </nav>
+  </header>
+
+  <section class="hero" id="home" aria-labelledby="hero-title">
+    <div class="sun" aria-hidden="true"></div>
+    <div class="cloud" aria-hidden="true"></div>
+    <div class="hero-content">
+      <span class="eyebrow">A little blocky adventure</span>
+      <h1 id="hero-title">Make your own world.</h1>
+      <p>A cozy, offline field guide for curious builders, brave explorers, and first-night survivors.</p>
+      <a class="button" href="#guide">START EXPLORING</a>
+    </div>
+    <div class="hill" aria-hidden="true"></div>
+  </section>
+
+  <main>
+    <section class="welcome" aria-label="Welcome">
+      <div>
+        <h2>Hey, adventurer!</h2>
+        <div class="welcome-card pixel-border">
+          <p>Every great build starts with a few blocks and a big idea. Browse this pocket guide, learn a couple of useful recipes, and remember: when the sun goes down, get somewhere safe!</p>
+        </div>
+      </div>
+      <div class="campfire pixel-border" aria-label="A campfire">
+        🔥
+        <small>Warm up. Plan your next build.</small>
+      </div>
+    </section>
+
+    <section id="guide">
+      <h2>Field guide</h2>
+      <p class="section-intro">Search the basics. This little guide works right here in your browser.</p>
+
+      <div class="toolbar">
+        <label for="search" class="visually-hidden">Search the field guide</label>
+        <input id="search" type="search" placeholder="Search blocks and items…" autocomplete="off">
+        <label for="category" class="visually-hidden">Filter by category</label>
+        <select id="category">
+          <option value="all">All categories</option>
+          <option value="blocks">Blocks</option>
+          <option value="tools">Tools</option>
+          <option value="nature">Nature</option>
+        </select>
+      </div>
+
+      <div class="grid" id="item-grid">
+        <article class="item-card pixel-border" data-category="blocks" data-search="grass block dirt surface building">
+          <span class="item-icon" aria-hidden="true">🟩</span>
+          <h3>Grass Block</h3>
+          <span class="tag">BLOCK</span>
+          <p>A bright start for paths, gardens, and hillsides.</p>
+        </article>
+        <article class="item-card pixel-border" data-category="blocks" data-search="stone block mining underground">
+          <span class="item-icon" aria-hidden="true">🪨</span>
+          <h3>Stone</h3>
+          <span class="tag">BLOCK</span>
+          <p>A sturdy building block found beneath the surface.</p>
+        </article>
+        <article class="item-card pixel-border" data-category="blocks" data-search="oak wood log tree building">
+          <span class="item-icon" aria-hidden="true">🪵</span>
+          <h3>Oak Log</h3>
+          <span class="tag">BLOCK</span>
+          <p>A useful first resource. Look for trees nearby.</p>
+        </article>
+        <article class="item-card pixel-border" data-category="tools" data-search="wooden pickaxe tool mining">
+          <span class="item-icon" aria-hidden="true">⛏️</span>
+          <h3>Wooden Pickaxe</h3>
+          <span class="tag">TOOL</span>
+          <p>A starter tool for carefully digging into the world.</p>
+        </article>
+        <article class="item-card pixel-border" data-category="nature" data-search="apple food nature tree">
+          <span class="item-icon" aria-hidden="true">🍎</span>
+          <h3>Apple</h3>
+          <span class="tag">NATURE</span>
+          <p>A handy snack you might find while exploring.</p>
+        </article>
+        <article class="item-card pixel-border" data-category="nature" data-search="torch light night safety">
+          <span class="item-icon" aria-hidden="true">🔦</span>
+          <h3>Torch</h3>
+          <span class="tag">NATURE</span>
+          <p>Light up a dark corner and make your shelter feel safe.</p>
+        </article>
+      </div>
+      <p id="no-results" role="status" hidden>No matching items. Try another search!</p>
+    </section>
+
+    <section id="crafting">
+      <h2>Quick crafting</h2>
+      <p class="section-intro">A few simple recipes to get your adventure moving.</p>
+      <div class="recipes">
+        <article class="recipe-card pixel-border">
+          <div class="recipe-art" aria-hidden="true">🪵 → 🪚</div>
+          <div>
+            <h3>Wooden planks</h3>
+            <p>Turn a log into planks for your first builds.</p>
+          </div>
+        </article>
+        <article class="recipe-card pixel-border">
+          <div class="recipe-art" aria-hidden="true">🪵 + 🪨 → ⛏️</div>
+          <div>
+            <h3>Starter pickaxe</h3>
+            <p>Combine planks and sticks to make a basic pickaxe.</p>
+          </div>
+        </article>
+      </div>
+      <div class="tip-card pixel-border" id="tip">
+        <strong>🌙 First-night tip:</strong> Gather wood before sunset, make a small shelter, and keep a light source close.
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <p><strong>BLOCKBOUND</strong> — a small fan-made block-world page.</p>
+    <p>Not affiliated with or endorsed by Mojang or Microsoft. Made to work offline.</p>
+  </footer>
+
+  <script>
+    const searchInput = document.querySelector("#search");
+    const categorySelect = document.querySelector("#category");
+    const cards = [...document.querySelectorAll(".item-card")];
+    const noResults = document.querySelector("#no-results");
+
+    function filterItems() {
+      const query = searchInput.value.trim().toLowerCase();
+      const category = categorySelect.value;
+      let visibleCount = 0;
+
+      for (const card of cards) {
+        const matchesText = card.dataset.search.includes(query)
+          || card.textContent.toLowerCase().includes(query);
+        const matchesCategory = category === "all" || card.dataset.category === category;
+        const show = matchesText && matchesCategory;
+
+        card.hidden = !show;
+        if (show) visibleCount++;
+      }
+
+      noResults.hidden = visibleCount > 0;
+    }
+
+    searchInput.addEventListener("input", filterItems);
+    categorySelect.addEventListener("change", filterItems);
+  </script>
+</body>
+</html>
