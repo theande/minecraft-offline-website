@@ -1,109 +1,166 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Blockbound — Offline Block Adventure</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Blockbound Survival</title>
   <style>
     :root {
-      color-scheme: light;
+      --bg: #f6f0df;
+      --panel: #fffaf0;
       --ink: #17231b;
-      --paper: #f3edda;
-      --card: #fffaf0;
-      --grass: #65a844;
-      --grass-dark: #3b742f;
-      --shadow: 0 5px 0 rgb(23 35 27 / 22%);
+      --grass: #67b64a;
+      --dirt: #8c5b2f;
+      --stone: #7a7f85;
+      --wood: #9e6733;
+      --leaf: #2f9341;
+      --sand: #e7d894;
+      --sky: #8ad3f0;
+      --sky-night: #1a2251;
+      --gold: #f7d663;
+      --warn: #d95b50;
+      --shadow: 0 6px 0 rgba(23, 35, 27, 0.9);
     }
+
     * { box-sizing: border-box; }
+    html, body { margin: 0; height: 100%; }
     body {
-      margin: 0;
-      min-height: 100vh;
-      padding: 18px;
-      color: var(--ink);
-      background: var(--paper);
-      font-family: "Trebuchet MS", system-ui, sans-serif;
+      display: flex; justify-content: center; align-items: center;
+      padding: 16px; background: var(--bg); color: var(--ink);
+      font-family: "Trebuchet MS", "Segoe UI", sans-serif;
     }
-    button { font: inherit; }
-    .app { width: min(1120px, 100%); margin: 0 auto; }
-    header {
+    .app {
+      width: min(1180px, 100%);
+      background: var(--panel);
+      border: 4px solid var(--ink);
+      box-shadow: var(--shadow);
+    }
+    .topbar {
       display: flex; justify-content: space-between; align-items: center;
-      gap: 12px; flex-wrap: wrap; padding: 12px 16px;
-      background: var(--card); border: 3px solid var(--ink); box-shadow: var(--shadow);
+      gap: 10px; flex-wrap: wrap; padding: 12px 16px; border-bottom: 4px solid var(--ink);
+      background: #f9f2e2;
     }
-    h1 { margin: 0; font-size: clamp(1.3rem, 3vw, 2rem); letter-spacing: .06em; }
-    .header-actions { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
-    .badge { padding: 6px 10px; background: #e6efd9; border: 2px solid var(--ink); font-weight: 800; }
-    .layout { display: grid; grid-template-columns: minmax(0, 1fr) 280px; gap: 14px; margin-top: 14px; align-items: start; }
-    .game-panel, aside { background: var(--card); border: 3px solid var(--ink); box-shadow: var(--shadow); }
-    .game-panel { overflow: hidden; }
-    canvas { display: block; width: 100%; height: auto; image-rendering: pixelated; cursor: crosshair; }
-    .game-caption { padding: 9px 12px; background: #e6efd9; border-top: 3px solid var(--ink); font-weight: 700; }
-    aside { padding: 14px; }
-    h2 { margin: 4px 0 10px; font-size: 1.05rem; text-transform: uppercase; letter-spacing: .04em; }
-    .stats { display: grid; grid-template-columns: 1fr 1fr; gap: 7px; margin-bottom: 14px; }
-    .stat { padding: 7px 8px; background: #eef4e5; border: 2px solid var(--ink); font-weight: 800; font-size: .9rem; }
-    .hotbar { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; margin-bottom: 14px; }
-    .slot { position: relative; min-width: 0; aspect-ratio: 1; display: grid; place-items: center; padding: 2px; border: 3px solid var(--ink); background: #f6f0dc; cursor: pointer; font-size: 1.45rem; }
-    .slot.active { background: #d7edbd; outline: 3px solid #e8b941; outline-offset: 1px; }
-    .slot-label { position: absolute; left: 3px; top: 0; font-size: .6rem; font-weight: 900; }
-    .count { position: absolute; right: 2px; bottom: 0; font-size: .72rem; font-weight: 900; text-shadow: 0 1px white, 1px 0 white; }
-    .inventory { display: grid; grid-template-columns: 1fr 1fr; gap: 5px 8px; margin: 0 0 14px; padding: 0; list-style: none; font-size: .88rem; font-weight: 750; }
-    .inventory li { display: flex; justify-content: space-between; gap: 4px; padding: 4px 2px; border-bottom: 1px solid #c9c4b4; }
+    .brand { font-size: clamp(1.4rem, 3vw, 2rem); font-weight: 900; letter-spacing: .08em; }
+    .status { display: flex; gap: 8px; flex-wrap: wrap; }
+    .badge {
+      background: #e7f2d5; border: 3px solid var(--ink); padding: 6px 10px; font-weight: 900;
+      font-size: .9rem;
+    }
+    .layout { display: grid; grid-template-columns: minmax(0, 1fr) 300px; min-height: 620px; }
+    .arena { position: relative; background: linear-gradient(#8ad3f0, #dff3ff 60%, #85c567 60%, #497d37 100%); }
+    canvas {
+      display: block; width: 100%; height: 100%; image-rendering: pixelated;
+      background: transparent;
+    }
+    .sidebar {
+      background: #fffdf8; border-left: 4px solid var(--ink); padding: 14px;
+    }
+    h2 { margin: 4px 0 12px; font-size: 1.02rem; letter-spacing: .06em; text-transform: uppercase; }
+    .hud {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 14px;
+    }
+    .stat {
+      background: #edf5e5; border: 3px solid var(--ink); padding: 7px 8px; font-weight: 900;
+      font-size: .9rem;
+    }
+    .bar-wrap {
+      display: flex; align-items: center; gap: 8px; margin-top: 8px;
+    }
+    .bar {
+      position: relative; flex: 1; height: 16px; border: 3px solid var(--ink);
+      background: #f1efd8; overflow: hidden;
+    }
+    .fill { position: absolute; left: 0; top: 0; bottom: 0; background: linear-gradient(#e47b5a, #b73c35); }
+    .fill.food { background: linear-gradient(#85d76c, #3d9d3f); }
+    .hotbar {
+      display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 7px; margin-bottom: 15px;
+    }
+    .slot {
+      position: relative; aspect-ratio: 1; display: grid; place-items: center; border: 3px solid var(--ink);
+      background: #f4ebd5; font-size: 1.55rem; font-weight: 900; cursor: pointer;
+    }
+    .slot.active { background: #ddecba; box-shadow: inset 0 0 0 3px #efc857; }
+    .slot-index { position: absolute; left: 3px; top: 1px; font-size: .58rem; font-weight: 900; }
+    .count {
+      position: absolute; right: 4px; bottom: 2px; font-size: .66rem; font-weight: 900;
+      background: rgba(255,255,255,.65); border: 2px solid var(--ink); padding: 1px 4px;
+    }
+    .inventory {
+      list-style: none; margin: 0 0 16px; padding: 0; display: grid; gap: 6px;
+    }
+    .inventory li {
+      display: flex; justify-content: space-between; gap: 8px; padding: 5px 6px; border-bottom: 1px solid #d8d0bb;
+      font-weight: 800; font-size: .9rem;
+    }
     .crafting { display: grid; gap: 7px; }
-    .craft-btn, .small-btn { padding: 8px; border: 2px solid var(--ink); color: var(--ink); background: #d9efbd; font-weight: 850; cursor: pointer; text-align: left; }
-    .craft-btn:hover, .small-btn:hover { background: #c6e8a4; }
-    .craft-btn:disabled { opacity: .5; cursor: not-allowed; }
-    .bottom-actions { display: flex; gap: 7px; margin-top: 10px; }
-    .small-btn { flex: 1; text-align: center; background: #f6e8bd; }
-    .help { margin-top: 12px; padding: 9px; background: #fff1c8; border: 2px solid var(--ink); font-size: .84rem; line-height: 1.45; }
-    #message { min-height: 1.4em; color: #355a2e; font-weight: 800; }
-    @media (max-width: 800px) { .layout { grid-template-columns: 1fr; } }
-    @media (max-width: 460px) { body { padding: 8px; } header { padding: 9px; } aside { padding: 10px; } .badge { font-size: .82rem; } }
+    .craft-btn, .mini-btn {
+      appearance: none; border: 3px solid var(--ink); background: #d9edbf; color: var(--ink);
+      font-weight: 900; cursor: pointer; padding: 8px 10px; box-shadow: 0 3px 0 rgba(23,35,27,0.8);
+    }
+    .craft-btn:active, .mini-btn:active { transform: translateY(2px); box-shadow: none; }
+    .help {
+      margin-top: 12px; padding: 9px; background: #fff0c4; border: 3px solid var(--ink);
+      font-size: .85rem; line-height: 1.5; font-weight: 800;
+    }
+    .mini-btn {
+      background: #f5e8ba; width: 100%; margin-top: 7px;
+    }
+    @media (max-width: 900px) { .layout { grid-template-columns: 1fr; } .sidebar { border-left: 0; border-top: 4px solid var(--ink); } }
   </style>
 </head>
 <body>
   <div class="app">
-    <header>
-      <h1>🟩 BLOCKBOUND</h1>
-      <div class="header-actions">
-        <span class="badge" id="day-label">Day 1</span>
-        <span class="badge">Offline game</span>
-        <button class="small-btn" id="new-world" type="button">New world</button>
+    <header class="topbar">
+      <div class="brand">🟩 BLOCKBOUND</div>
+      <div class="status">
+        <span class="badge" id="dayLabel">Day 1</span>
+        <span class="badge" id="weatherLabel">Sunny</span>
       </div>
     </header>
 
     <div class="layout">
-      <section class="game-panel" aria-label="Game world">
-        <canvas id="game" width="960" height="544" aria-label="Blockbound game world"></canvas>
-        <div class="game-caption" id="message" role="status" aria-live="polite">Explore the meadow. Mine nearby resources and build something!</div>
-      </section>
+      <div class="arena">
+        <canvas id="game" width="960" height="560" aria-label="Blockbound game world"></canvas>
+      </div>
 
-      <aside>
+      <aside class="sidebar">
         <h2>Adventurer</h2>
-        <div class="stats">
-          <div class="stat">❤️ Health <span id="health">10</span></div>
-          <div class="stat">🍎 Food <span id="food">5</span></div>
-          <div class="stat">📍 X <span id="pos-x">0</span></div>
-          <div class="stat">📍 Y <span id="pos-y">0</span></div>
+        <div class="hud">
+          <div class="stat">❤️ <span id="healthValue">10</span></div>
+          <div class="stat">🍎 <span id="foodValue">5</span></div>
         </div>
-        <h2>Hotbar <small>(1–5)</small></h2>
-        <div class="hotbar" id="hotbar" aria-label="Select a building item"></div>
+        <div class="bar-wrap">
+          <span>HP</span>
+          <div class="bar"><div id="healthBar" class="fill" style="width:100%"></div></div>
+        </div>
+        <div class="bar-wrap">
+          <span>Food</span>
+          <div class="bar"><div id="foodBar" class="fill food" style="width:100%"></div></div>
+        </div>
+
+        <h2>Hotbar</h2>
+        <div class="hotbar" id="hotbar"></div>
+
         <h2>Inventory</h2>
         <ul class="inventory" id="inventory"></ul>
+
         <h2>Crafting</h2>
         <div class="crafting">
-          <button class="craft-btn" data-recipe="pickaxe" type="button">⛏ Pickaxe — 3 wood + 2 stone</button>
-          <button class="craft-btn" data-recipe="torch" type="button">🔥 Torches — 2 wood + 1 coal</button>
-          <button class="craft-btn" data-recipe="campfire" type="button">🔥 Campfire — 3 wood + 2 stone</button>
-          <button class="craft-btn" data-recipe="eat" type="button">🍎 Eat an apple</button>
+          <button class="craft-btn" data-craft="pickaxe" type="button">⛏ Pickaxe — 3 wood + 2 stone</button>
+          <button class="craft-btn" data-craft="torch" type="button">🔥 Torch — 2 wood + 1 coal</button>
+          <button class="craft-btn" data-craft="campfire" type="button">⛺ Campfire — 3 wood + 2 stone</button>
+          <button class="craft-btn" data-craft="apple" type="button">🍎 Eat apple</button>
         </div>
+        <button class="mini-btn" id="newWorldBtn" type="button">New world</button>
+
         <div class="help">
           <strong>Controls</strong><br>
-          Move: WASD or arrow keys<br>
-          Mine: Space or click a nearby block<br>
-          Build: B (places selected hotbar item)<br>
-          Select item: number keys 1–5<br>
-          Find apples to restore food. Progress saves in this browser.
+          Move: A/D or arrow keys<br>
+          Jump: W / Up / Space<br>
+          Mine: Space on a nearby block or click block<br>
+          Build: B while facing a valid tile<br>
+          Select hotbar: 1–5<br>
+          Gather meters and survive the night.
         </div>
       </aside>
     </div>
@@ -111,273 +168,597 @@
 
   <script>
     (() => {
-      'use strict';
-      const canvas = document.querySelector('#game');
+      const canvas = document.getElementById('game');
       const ctx = canvas.getContext('2d');
       const TILE = 32;
-      const COLS = 30;
-      const ROWS = 17;
-      const SAVE_KEY = 'blockbound-save-v2';
-      const types = {
-        grass: { icon: '🟩', name: 'Grass', solid: false },
-        tree: { icon: '🌳', name: 'Tree', solid: true },
-        rock: { icon: '🪨', name: 'Stone', solid: true },
-        coal: { icon: '⚫', name: 'Coal', solid: true },
-        apple: { icon: '🍎', name: 'Apple', solid: false },
-        wood: { icon: '🪵', name: 'Wood block', solid: true },
-        stone: { icon: '⬜', name: 'Stone block', solid: true },
-        torch: { icon: '🔥', name: 'Torch', solid: false },
-        campfire: { icon: '🔥', name: 'Campfire', solid: false }
+      const WORLD_W = 54;
+      const WORLD_H = 22;
+      const GRAVITY = 0.55;
+      const MOVE_ACCEL = 0.7;
+      const MAX_SPEED = 4.1;
+      const SAVE_KEY = 'blockbound-save-v3';
+      const hotbarNames = ['grass', 'wood', 'stone', 'torch', 'campfire'];
+
+      const inventory = { grass: 16, wood: 0, stone: 0, coal: 0, apple: 2, torch: 0, campfire: 0, pickaxe: 0 };
+      const player = {
+        x: 6 * TILE + 10,
+        y: 5 * TILE + 10,
+        w: 22,
+        h: 30,
+        vx: 0,
+        vy: 0,
+        onGround: false,
+        face: 1,
+        health: 10,
+        food: 5,
+        selected: 0,
+        day: 1
       };
-      const slots = ['grass', 'wood', 'stone', 'torch', 'campfire'];
-      const counts = { grass: 12, wood: 0, stone: 0, coal: 0, apple: 2, torch: 0, campfire: 0, pickaxe: 0 };
-      const player = { x: 15, y: 8, faceX: 1, faceY: 0, health: 10, food: 5, day: 1, selected: 0 };
+
       let world = [];
-      let moveTimer = 0;
-      let saveTimer = 0;
-      let lastStep = 0;
-      const held = new Set();
-      const messageEl = document.querySelector('#message');
+      let enemies = [];
+      let keys = {};
+      let gameTime = 0;
+      let lastPaint = 0;
+      let lastDamage = 0;
+      let lastSave = 0;
+      let lastMine = 0;
 
-      function say(text) { messageEl.textContent = text; }
-      function inside(x, y) { return x >= 0 && y >= 0 && x < COLS && y < ROWS; }
-      function tile(x, y) { return inside(x, y) ? world[y][x] : 'rock'; }
-      function isSolid(x, y) { return !inside(x, y) || types[tile(x, y)]?.solid === true; }
-      function random(min, max) { return Math.floor(Math.random() * (max - min + 1)) + min; }
+      const tileTypes = {
+        air: { draw: false },
+        grass: { icon: '🌱', solid: false },
+        dirt: { icon: '🟫', solid: true },
+        stone: { icon: '🪨', solid: true },
+        wood: { icon: '🪵', solid: true },
+        leaf: { icon: '🍃', solid: false },
+        coal: { icon: '⚫', solid: true },
+        apple: { icon: '🍎', solid: false },
+        torch: { icon: '🔥', solid: false },
+        campfire: { icon: '🔥', solid: false },
+        sand: { icon: '🏖️', solid: true }
+      };
 
-      function makeWorld() {
-        world = Array.from({ length: ROWS }, () => Array(COLS).fill('grass'));
-        for (let i = 0; i < 68; i++) {
-          const x = random(1, COLS - 2), y = random(1, ROWS - 2);
-          if (Math.abs(x - player.x) + Math.abs(y - player.y) < 4) continue;
-          world[y][x] = Math.random() < 0.66 ? 'tree' : 'rock';
-        }
-        for (let i = 0; i < 14; i++) {
-          const x = random(1, COLS - 2), y = random(1, ROWS - 2);
-          if (world[y][x] === 'grass') world[y][x] = Math.random() < 0.65 ? 'apple' : 'coal';
-        }
-        // Clear a small safe starting area.
-        for (let y = player.y - 1; y <= player.y + 1; y++) {
-          for (let x = player.x - 1; x <= player.x + 1; x++) world[y][x] = 'grass';
-        }
+      function rand(min, max) { return Math.floor(Math.random() * (max - min + 1)) + min; }
+      function clamp(value, min, max) { return Math.min(max, Math.max(min, value)); }
+      function inWorld(x, y) { return x >= 0 && y >= 0 && x < WORLD_W && y < WORLD_H; }
+      function tileAt(x, y) { return inWorld(x, y) ? world[y][x] : 'stone'; }
+      function setTile(x, y, value) { if (inWorld(x, y)) world[y][x] = value; }
+      function isSolidTile(type) { return !!tileTypes[type] && tileTypes[type].solid; }
+
+      function rect(x, y, w, h) {
+        return { x, y, w, h };
+      }
+      function intersects(a, b) {
+        return a.x < b.x + b.w && a.x + a.w > b.x && a.y < b.y + b.h && a.y + a.h > b.y;
       }
 
-      function save() {
-        try {
-          localStorage.setItem(SAVE_KEY, JSON.stringify({ world, player, counts }));
-        } catch { /* The game remains playable if storage is unavailable. */ }
+      function createEnemy(x, y) {
+        return { x, y, w: 18, h: 18, vx: (Math.random() > 0.5 ? 1 : -1) * 0.8, hp: 4, alive: true };
       }
 
-      function load() {
-        try {
-          const saved = JSON.parse(localStorage.getItem(SAVE_KEY));
-          if (!saved || !Array.isArray(saved.world) || saved.world.length !== ROWS) return false;
-          world = saved.world;
-          Object.assign(player, saved.player);
-          Object.assign(counts, saved.counts);
-          if (!inside(player.x, player.y) || isSolid(player.x, player.y)) {
-            player.x = 15; player.y = 8; world[player.y][player.x] = 'grass';
+      function generateWorld() {
+        world = Array.from({ length: WORLD_H }, () => Array(WORLD_W).fill('air'));
+
+        for (let x = 0; x < WORLD_W; x++) {
+          const base = 12 + Math.sin(x / 6) * 2;
+          for (let y = 0; y < WORLD_H; y++) {
+            if (y > base) {
+              const d = y - base;
+              if (d <= 2) world[y][x] = 'grass';
+              else if (d <= 5) world[y][x] = 'dirt';
+              else world[y][x] = 'stone';
+            }
           }
+        }
+
+        for (let x = 0; x < WORLD_W; x++) {
+          if (Math.random() < 0.05) {
+            const h = rand(1, 3);
+            for (let y = 0; y < h; y++) {
+              if (inWorld(x, 10 - y)) world[10 - y][x] = 'sand';
+            }
+          }
+        }
+
+        for (let i = 0; i < 40; i++) {
+          const x = rand(2, WORLD_W - 4);
+          const y = rand(3, WORLD_H - 8);
+          if (tileAt(x, y) === 'grass' || tileAt(x, y) === 'dirt') {
+            const height = rand(2, 5);
+            for (let trunk = 0; trunk < height; trunk++) {
+              const ty = y - trunk;
+              if (inWorld(x, ty)) world[ty][x] = 'wood';
+            }
+            for (let dx = -2; dx <= 2; dx++) {
+              for (let dy = -2; dy <= 2; dy++) {
+                const nx = x + dx;
+                const ny = y - height + dy;
+                if (inWorld(nx, ny) && Math.abs(dx) + Math.abs(dy) <= 4 && Math.random() > 0.12) {
+                  if (tileAt(nx, ny) === 'air') world[ny][nx] = 'leaf';
+                }
+              }
+            }
+          }
+        }
+
+        for (let i = 0; i < 130; i++) {
+          const x = rand(2, WORLD_W - 3);
+          const y = rand(3, WORLD_H - 5);
+          if (tileAt(x, y) === 'stone' || tileAt(x, y) === 'dirt') {
+            if (Math.random() < 0.5) world[y][x] = 'coal';
+          }
+        }
+
+        for (let i = 0; i < 250; i++) {
+          const x = rand(2, WORLD_W - 3);
+          const y = rand(4, WORLD_H - 4);
+          if (tileAt(x, y) === 'grass') world[y][x] = 'apple';
+        }
+
+        for (let i = 0; i < 12; i++) {
+          const x = rand(5, WORLD_W - 5);
+          const y = rand(5, WORLD_H - 3);
+          if (tileAt(x, y) === 'grass') {
+            enemies.push(createEnemy(x * TILE + 8, y * TILE - 17));
+          }
+        }
+      }
+
+      function getSaveData() {
+        return { player, inventory, world, enemies, gameTime, lastDamage, lastSave };
+      }
+
+      function saveGame() {
+        try {
+          localStorage.setItem(SAVE_KEY, JSON.stringify(getSaveData()));
+        } catch (error) {}
+      }
+
+      function loadGame() {
+        try {
+          const raw = localStorage.getItem(SAVE_KEY);
+          if (!raw) return false;
+          const data = JSON.parse(raw);
+          if (!data || !Array.isArray(data.world) || data.world.length !== WORLD_H) return false;
+          Object.assign(player, data.player);
+          Object.assign(inventory, data.inventory);
+          world = data.world;
+          enemies = (data.enemies || []).map(e => ({ ...e }));
+          gameTime = data.gameTime || 0;
+          lastDamage = data.lastDamage || 0;
+          lastSave = data.lastSave || 0;
           return true;
-        } catch { return false; }
-      }
-
-      function setupNewWorld() {
-        player.x = 15; player.y = 8; player.faceX = 1; player.faceY = 0;
-        player.health = 10; player.food = 5; player.day = 1; player.selected = 0;
-        Object.assign(counts, { grass: 12, wood: 0, stone: 0, coal: 0, apple: 2, torch: 0, campfire: 0, pickaxe: 0 });
-        makeWorld(); save(); renderUi(); say('New world created! Explore and collect resources.');
-      }
-
-      function target() { return { x: player.x + player.faceX, y: player.y + player.faceY }; }
-
-      function mine(x, y) {
-        if (!inside(x, y) || Math.abs(x - player.x) + Math.abs(y - player.y) > 1) {
-          say('That block is too far away. Mine a nearby tile.'); return;
+        } catch (error) {
+          return false;
         }
-        const type = tile(x, y);
-        if (type === 'grass') { say('Just grass here. Try a tree, stone, coal, or apple.'); return; }
-        if (type === 'tree') { counts.wood += 3; }
-        else if (type === 'rock') { counts.stone += 2; }
-        else if (type === 'coal') { counts.coal += 1; counts.stone += 1; }
-        else if (type === 'apple') { counts.apple += 1; }
-        else if (type === 'wood') { counts.wood += 1; }
-        else if (type === 'stone') { counts.stone += 1; }
-        else if (type === 'torch') { counts.torch += 1; }
-        else if (type === 'campfire') { counts.campfire += 1; }
-        world[y][x] = 'grass';
-        say(`Collected ${types[type]?.name || type}!`);
-        renderUi(); save();
       }
 
-      function step(dx, dy) {
-        player.faceX = dx; player.faceY = dy;
-        const nx = player.x + dx, ny = player.y + dy;
-        if (!inside(nx, ny)) return;
-        if (isSolid(nx, ny)) { say('A block is in the way. Face it and press Space to mine.'); return; }
-        player.x = nx; player.y = ny;
-        const found = tile(nx, ny);
-        if (found === 'apple') {
-          counts.apple += 1; world[ny][nx] = 'grass'; say('You picked up an apple!'); renderUi(); save();
-        }
-        if (found === 'torch' || found === 'campfire') say('A cozy light for your build.');
-        if (Math.random() < 0.025) { player.food = Math.max(0, player.food - 1); }
-        if (player.food === 0) player.health = Math.max(1, player.health - 1);
-        player.day = Math.floor((Date.now() - startTime) / 120000) + 1;
-        renderUi(); save();
-      }
-
-      function mineFacing() { const t = target(); mine(t.x, t.y); }
-
-      function place() {
-        const t = target();
-        if (!inside(t.x, t.y) || Math.abs(t.x - player.x) + Math.abs(t.y - player.y) !== 1) { say('Face an adjacent empty tile to build.'); return; }
-        const item = slots[player.selected];
-        if (item === 'grass') { say('Grass is the ground—not a placeable item. Select wood, stone, torch, or campfire.'); return; }
-        if ((counts[item] || 0) < 1) { say(`No ${types[item].name.toLowerCase()} to place. Mine or craft some first.`); return; }
-        if (tile(t.x, t.y) !== 'grass') { say('That tile is occupied. Mine it first.'); return; }
-        world[t.y][t.x] = item;
-        counts[item]--;
-        say(`${types[item].name} placed!`); renderUi(); save();
-      }
-
-      function craft(recipe) {
-        if (recipe === 'pickaxe') {
-          if (counts.wood < 3 || counts.stone < 2) return say('Need 3 wood and 2 stone for a pickaxe.');
-          counts.wood -= 3; counts.stone -= 2; counts.pickaxe++;
-          say('Pickaxe crafted!');
-        } else if (recipe === 'torch') {
-          if (counts.wood < 2 || counts.coal < 1) return say('Need 2 wood and 1 coal for a torch.');
-          counts.wood -= 2; counts.coal--; counts.torch += 3;
-          say('Crafted 3 torches!');
-        } else if (recipe === 'campfire') {
-          if (counts.wood < 3 || counts.stone < 2) return say('Need 3 wood and 2 stone for a campfire.');
-          counts.wood -= 3; counts.stone -= 2; counts.campfire++;
-          say('Campfire crafted!');
-        } else if (recipe === 'eat') {
-          if (counts.apple < 1) return say('You have no apples. Find one in the meadow.');
-          if (player.food >= 5 && player.health >= 10) return say('You are already full and healthy.');
-          counts.apple--; player.food = Math.min(5, player.food + 2); player.health = Math.min(10, player.health + 2);
-          say('Yum! Food and health restored.');
-        }
-        renderUi(); save();
-      }
-
-      function renderUi() {
-        document.querySelector('#health').textContent = player.health;
-        document.querySelector('#food').textContent = player.food;
-        document.querySelector('#pos-x').textContent = player.x;
-        document.querySelector('#pos-y').textContent = player.y;
-        document.querySelector('#day-label').textContent = `Day ${player.day}`;
-        const hotbar = document.querySelector('#hotbar');
-        hotbar.replaceChildren();
-        slots.forEach((item, index) => {
-          const button = document.createElement('button');
-          button.type = 'button'; button.className = `slot${index === player.selected ? ' active' : ''}`;
-          button.title = `${index + 1}: ${types[item].name} (${counts[item] || 0})`;
-          button.setAttribute('aria-label', button.title);
-          button.innerHTML = `<span class="slot-label">${index + 1}</span>${types[item].icon}<span class="count">${counts[item] || 0}</span>`;
-          button.addEventListener('click', () => { player.selected = index; renderUi(); });
-          hotbar.append(button);
+      function newWorld() {
+        Object.assign(player, {
+          x: 6 * TILE + 10, y: 5 * TILE + 10, w: 22, h: 30,
+          vx: 0, vy: 0, onGround: false, face: 1,
+          health: 10, food: 5, selected: 0, day: 1
         });
-        const inv = document.querySelector('#inventory');
-        const display = [
-          ['🪵 Wood', counts.wood], ['🪨 Stone', counts.stone], ['⚫ Coal', counts.coal],
-          ['🍎 Apples', counts.apple], ['🔥 Torches', counts.torch], ['⛺ Campfires', counts.campfire], ['⛏ Pickaxes', counts.pickaxe]
+        Object.keys(inventory).forEach(k => { inventory[k] = k === 'grass' ? 16 : 0; inventory.apple = 2; });
+        inventory.grass = 16;
+        inventory.apple = 2;
+        generateWorld();
+        gameTime = 0;
+        saveGame();
+        updateHud();
+      }
+
+      function updateHud() {
+        document.getElementById('healthValue').textContent = Math.ceil(player.health);
+        document.getElementById('foodValue').textContent = Math.ceil(player.food);
+        document.getElementById('dayLabel').textContent = `Day ${player.day}`;
+        document.getElementById('weatherLabel').textContent = (Math.sin(gameTime) > 0.3) ? 'Sunny' : 'Twilight';
+        document.getElementById('healthBar').style.width = (player.health / 10 * 100) + '%';
+        document.getElementById('foodBar').style.width = (player.food / 5 * 100) + '%';
+
+        const hotbarEl = document.getElementById('hotbar');
+        hotbarEl.innerHTML = '';
+        hotbarNames.forEach((name, index) => {
+          const btn = document.createElement('button');
+          btn.type = 'button';
+          btn.className = 'slot' + (index === player.selected ? ' active' : '');
+          btn.innerHTML = `<span class="slot-index">${index + 1}</span>${tileTypes[name].icon || '□'}<span class="count">${inventory[name] || 0}</span>`;
+          btn.addEventListener('click', () => { player.selected = index; updateHud(); });
+          hotbarEl.appendChild(btn);
+        });
+
+        const inventoryEl = document.getElementById('inventory');
+        const entries = [
+          ['Grass', inventory.grass],
+          ['Wood', inventory.wood],
+          ['Stone', inventory.stone],
+          ['Coal', inventory.coal],
+          ['Apples', inventory.apple],
+          ['Torches', inventory.torch],
+          ['Campfires', inventory.campfire],
+          ['Pickaxes', inventory.pickaxe]
         ];
-        inv.replaceChildren(...display.map(([label, amount]) => {
-          const li = document.createElement('li'); li.textContent = `${label} ${amount}`; return li;
-        }));
+        inventoryEl.innerHTML = '';
+        entries.forEach(([label, value]) => {
+          const li = document.createElement('li');
+          li.innerHTML = `<span>${label}</span><strong>${value}</strong>`;
+          inventoryEl.appendChild(li);
+        });
+      }
+
+      function mineBlockAtTile(tx, ty) {
+        const type = tileAt(tx, ty);
+        if (!type || type === 'air') return;
+        if (type === 'grass') inventory.grass += 1;
+        if (type === 'dirt') inventory.grass += 1;
+        if (type === 'stone') inventory.stone += 1;
+        if (type === 'wood') inventory.wood += 1;
+        if (type === 'coal') inventory.coal += 1;
+        if (type === 'apple') inventory.apple += 1;
+        if (type === 'leaf') inventory.wood += 1;
+        if (type === 'sand') inventory.grass += 1;
+        world[ty][tx] = 'air';
+        updateHud();
+      }
+
+      function placeSelectedBlock() {
+        const item = hotbarNames[player.selected];
+        if (!inventory[item] || inventory[item] <= 0) return;
+        const px = Math.floor((player.x + player.w / 2) / TILE);
+        const py = Math.floor((player.y + player.h / 2) / TILE);
+        const dx = player.face > 0 ? 1 : -1;
+        const tx = px + dx;
+        const ty = Math.floor((player.y + player.h / 2) / TILE);
+        if (!inWorld(tx, ty)) return;
+        if (tileAt(tx, ty) !== 'air') return;
+        world[ty][tx] = item;
+        inventory[item] -= 1;
+        updateHud();
+      }
+
+      function craft(item) {
+        if (item === 'pickaxe') {
+          if (inventory.wood < 3 || inventory.stone < 2) return;
+          inventory.wood -= 3; inventory.stone -= 2; inventory.pickaxe += 1;
+        }
+        if (item === 'torch') {
+          if (inventory.wood < 2 || inventory.coal < 1) return;
+          inventory.wood -= 2; inventory.coal -= 1; inventory.torch += 2;
+        }
+        if (item === 'campfire') {
+          if (inventory.wood < 3 || inventory.stone < 2) return;
+          inventory.wood -= 3; inventory.stone -= 2; inventory.campfire += 1;
+        }
+        if (item === 'apple') {
+          if (inventory.apple < 1) return;
+          inventory.apple -= 1; player.food = clamp(player.food + 2, 0, 5); player.health = clamp(player.health + 2, 0, 10);
+        }
+        updateHud();
+      }
+
+      function touchMine() {
+        const px = Math.floor((player.x + player.w / 2) / TILE);
+        const py = Math.floor((player.y + player.h / 2) / TILE);
+        const xLook = px + player.face;
+        const yLook = py;
+        if (xLook >= 0 && xLook < WORLD_W && yLook >= 0 && yLook < WORLD_H) {
+          if (tileAt(xLook, yLook) !== 'air') {
+            mineBlockAtTile(xLook, yLook);
+          }
+        }
+      }
+
+      function isTouchingGround() {
+        const left = Math.floor(player.x / TILE);
+        const right = Math.floor((player.x + player.w) / TILE);
+        const feetY = Math.floor((player.y + player.h + 1) / TILE);
+        for (let x = left; x <= right; x++) {
+          const type = tileAt(x, feetY);
+          if (type !== 'air' && type !== 'leaf') return true;
+        }
+        return false;
+      }
+
+      function handleMovement(dt) {
+        let moveDir = 0;
+        if (keys['a'] || keys['arrowleft']) moveDir = -1;
+        if (keys['d'] || keys['arrowright']) moveDir = 1;
+        const accel = moveDir === 0 ? 0.55 : MOVE_ACCEL;
+        if (moveDir !== 0) {
+          player.vx += moveDir * accel * dt;
+          player.face = moveDir;
+          player.vx = clamp(player.vx, -MAX_SPEED, MAX_SPEED);
+        } else {
+          player.vx *= 0.75;
+          if (Math.abs(player.vx) < 0.05) player.vx = 0;
+        }
+
+        if ((keys['w'] || keys['arrowup'] || keys[' ']) && player.onGround) {
+          player.vy = -10.5;
+          player.onGround = false;
+        }
+
+        player.vy += GRAVITY * dt;
+        if (player.vy > 14) player.vy = 14;
+
+        player.x += player.vx * dt;
+        const leftTile = Math.floor(player.x / TILE);
+        const rightTile = Math.floor((player.x + player.w) / TILE);
+        if (player.x < 0) player.x = 0;
+        if (player.x + player.w > WORLD_W * TILE) player.x = WORLD_W * TILE - player.w;
+
+        for (let ty = Math.floor(player.y / TILE); ty <= Math.floor((player.y + player.h) / TILE); ty++) {
+          for (let tx = leftTile; tx <= rightTile; tx++) {
+            if (inWorld(tx, ty) && tileAt(tx, ty) !== 'air' && tileAt(tx, ty) !== 'leaf') {
+              if (player.x < tx * TILE + TILE && player.x + player.w > tx * TILE) {
+                if (player.vx > 0) player.x = tx * TILE - player.w;
+                if (player.vx < 0) player.x = tx * TILE + TILE;
+                player.vx = 0;
+              }
+            }
+          }
+        }
+
+        player.y += player.vy * dt;
+        player.onGround = false;
+        for (let tx = Math.floor(player.x / TILE); tx <= Math.floor((player.x + player.w) / TILE); tx++) {
+          const bottomTile = Math.floor((player.y + player.h) / TILE);
+          const topTile = Math.floor(player.y / TILE);
+          for (let ty = topTile; ty <= bottomTile; ty++) {
+            if (inWorld(tx, ty) && tileAt(tx, ty) !== 'air' && tileAt(tx, ty) !== 'leaf') {
+              const blockRect = rect(tx * TILE, ty * TILE, TILE, TILE);
+              const playerRect = rect(player.x, player.y, player.w, player.h);
+              if (intersects(playerRect, blockRect)) {
+                if (player.vy >= 0 && player.y + player.h - player.vy <= ty * TILE + 6) {
+                  player.y = ty * TILE - player.h;
+                  player.vy = 0;
+                  player.onGround = true;
+                }
+                if (player.vy < 0 && player.y >= ty * TILE + TILE - 5) {
+                  player.y = ty * TILE + TILE;
+                  player.vy = 0;
+                }
+              }
+            }
+          }
+        }
+
+        if (!player.onGround && isTouchingGround()) player.onGround = true;
+
+        if (player.y > WORLD_H * TILE + 100) {
+          player.health -= 2;
+          player.x = 6 * TILE + 10;
+          player.y = 5 * TILE + 10;
+          player.vx = 0;
+          player.vy = 0;
+        }
+      }
+
+      function updateEnemies(dt) {
+        enemies = enemies.filter(enemy => enemy.alive);
+        enemies.forEach(enemy => {
+          enemy.x += enemy.vx * dt;
+          const nextX = enemy.x + enemy.w;
+          const left = Math.floor(enemy.x / TILE);
+          const right = Math.floor(nextX / TILE);
+          const midY = Math.floor((enemy.y + enemy.h) / TILE);
+          const nextTile = tileAt(left, midY);
+          const nextTile2 = tileAt(right, midY);
+          if (nextTile !== 'air' || nextTile2 !== 'air') enemy.vx *= -1;
+          if (Math.abs(enemy.x - player.x) < 32 && Math.abs(enemy.y - player.y) < 32) {
+            if (Date.now() - lastDamage > 1000) {
+              player.health = clamp(player.health - 1, 0, 10);
+              lastDamage = Date.now();
+            }
+          }
+        });
       }
 
       function drawTile(type, x, y) {
-        const px = x * TILE, py = y * TILE;
-        ctx.fillStyle = '#6eaf4b'; ctx.fillRect(px, py, TILE, TILE);
-        ctx.fillStyle = ((x * 7 + y * 11) % 4 === 0) ? '#78bc53' : '#68a947';
-        ctx.fillRect(px + ((x + y) % 3) * 8 + 3, py + ((x * 2 + y) % 3) * 8 + 4, 3, 3);
-        if (type === 'tree') {
-          ctx.fillStyle = '#704522'; ctx.fillRect(px + 13, py + 16, 7, 14);
-          ctx.fillStyle = '#287a3e'; ctx.fillRect(px + 4, py + 2, 24, 21);
-          ctx.fillStyle = '#399a4a'; ctx.fillRect(px + 8, py + 5, 16, 12);
-        } else if (type === 'rock' || type === 'stone') {
-          ctx.fillStyle = type === 'rock' ? '#858b8a' : '#a9afb0';
-          ctx.fillRect(px + 5, py + 7, 22, 19); ctx.fillRect(px + 9, py + 4, 14, 24);
-          ctx.fillStyle = '#c1c5c3'; ctx.fillRect(px + 9, py + 8, 5, 3);
-        } else if (type === 'coal') {
-          ctx.fillStyle = '#777c7b'; ctx.fillRect(px + 5, py + 7, 22, 19);
-          ctx.fillStyle = '#272b2c'; ctx.fillRect(px + 9, py + 10, 5, 5); ctx.fillRect(px + 18, py + 17, 6, 5);
-        } else if (type === 'apple') {
-          ctx.fillStyle = '#df3e36'; ctx.fillRect(px + 10, py + 11, 13, 13);
-          ctx.fillStyle = '#4b913f'; ctx.fillRect(px + 17, py + 7, 6, 4);
-        } else if (type === 'wood') {
-          ctx.fillStyle = '#754623'; ctx.fillRect(px + 5, py + 5, 22, 22);
-          ctx.fillStyle = '#bd8044'; ctx.fillRect(px + 8, py + 8, 16, 4);
-        } else if (type === 'torch') {
-          ctx.fillStyle = '#81552e'; ctx.fillRect(px + 14, py + 13, 5, 15);
-          ctx.fillStyle = '#ffdb55'; ctx.fillRect(px + 11, py + 5, 11, 10);
-          ctx.fillStyle = '#ff9147'; ctx.fillRect(px + 14, py + 2, 5, 8);
-        } else if (type === 'campfire') {
-          ctx.fillStyle = '#704522'; ctx.fillRect(px + 5, py + 21, 22, 5);
-          ctx.fillStyle = '#f17332'; ctx.fillRect(px + 9, py + 11, 15, 13);
-          ctx.fillStyle = '#ffdd56'; ctx.fillRect(px + 13, py + 7, 8, 12);
+        const px = x * TILE;
+        const py = y * TILE;
+
+        if (type === 'air') return;
+        ctx.fillStyle = '#6fc049';
+        if (type === 'dirt') ctx.fillStyle = '#9e603a';
+        if (type === 'stone') ctx.fillStyle = '#7a7f85';
+        if (type === 'wood') ctx.fillStyle = '#9d6632';
+        if (type === 'leaf') ctx.fillStyle = '#2b8f47';
+        if (type === 'coal') ctx.fillStyle = '#2a2b2d';
+        if (type === 'apple') ctx.fillStyle = '#e2453d';
+        if (type === 'sand') ctx.fillStyle = '#e6d289';
+        if (type === 'torch') ctx.fillStyle = '#f1b648';
+        if (type === 'campfire') ctx.fillStyle = '#f18337';
+
+        if (type === 'grass') {
+          ctx.fillStyle = '#62a746';
+          ctx.fillRect(px, py, TILE, TILE);
+          ctx.fillStyle = '#89d15a'; ctx.fillRect(px, py, TILE, 4);
+          return;
         }
-        ctx.strokeStyle = 'rgba(24,35,27,.12)'; ctx.strokeRect(px, py, TILE, TILE);
+
+        if (type === 'dirt') {
+          ctx.fillRect(px, py, TILE, TILE);
+          ctx.fillStyle = '#754326'; ctx.fillRect(px + 3, py + 8, TILE - 6, 4); return;
+        }
+
+        if (type === 'stone') {
+          ctx.fillRect(px, py, TILE, TILE);
+          ctx.fillStyle = '#999fa3'; ctx.fillRect(px + 5, py + 3, 7, 5); ctx.fillRect(px + 14, py + 12, 8, 5); return;
+        }
+
+        if (type === 'coal') {
+          ctx.fillRect(px, py, TILE, TILE); ctx.fillStyle = '#12151a';
+          ctx.fillRect(px + 8, py + 8, 12, 12); return;
+        }
+
+        if (type === 'wood') {
+          ctx.fillRect(px, py, TILE, TILE);
+          ctx.fillStyle = '#6f4526'; ctx.fillRect(px + 11, py, 10, TILE); return;
+        }
+
+        if (type === 'leaf') {
+          ctx.fillRect(px, py, TILE, TILE);
+          ctx.fillStyle = '#3ea04a'; ctx.fillRect(px + 4, py + 4, TILE - 8, TILE - 8); return;
+        }
+
+        if (type === 'sand') {
+          ctx.fillRect(px, py, TILE, TILE); ctx.fillStyle = '#d8c57b'; ctx.fillRect(px + 3, py + 2, 4, 4); return;
+        }
+
+        if (type === 'apple') {
+          ctx.fillRect(px, py, TILE, TILE); ctx.fillStyle = '#d94242';
+          ctx.beginPath(); ctx.arc(px + TILE / 2, py + TILE / 2, 9, 0, Math.PI * 2); ctx.fill();
+          ctx.fillStyle = '#1f8d32'; ctx.fillRect(px + TILE / 2 - 1, py + 4, 3, 7); return;
+        }
+
+        if (type === 'torch') {
+          ctx.fillStyle = '#5a3a1d'; ctx.fillRect(px + 13, py + 10, 6, 15);
+          ctx.fillStyle = '#ffd45e'; ctx.fillRect(px + 7, py + 2, 18, 15); return;
+        }
+
+        if (type === 'campfire') {
+          ctx.fillStyle = '#6a3c20'; ctx.fillRect(px + 5, py + 18, TILE - 10, 10);
+          ctx.fillStyle = '#ffc44f'; ctx.beginPath(); ctx.arc(px + TILE / 2, py + TILE / 2, TILE * .22, 0, Math.PI * 2); ctx.fill(); return;
+        }
+      }
+
+      function drawEnemy(enemy) {
+        ctx.fillStyle = '#5edb7a';
+        ctx.fillRect(enemy.x, enemy.y, enemy.w, enemy.h);
+        ctx.fillStyle = '#1e2f1d';
+        ctx.fillRect(enemy.x + 4, enemy.y + 4, 4, 4);
+        ctx.fillRect(enemy.x + enemy.w - 8, enemy.y + 4, 4, 4);
+      }
+
+      function drawPlayer() {
+        ctx.fillStyle = '#2b2f48';
+        ctx.fillRect(player.x, player.y + 8, player.w, player.h - 8);
+        ctx.fillStyle = '#f0c9a6';
+        ctx.fillRect(player.x + 4, player.y + 2, player.w - 8, 12);
+        ctx.fillStyle = '#1c1d26';
+        ctx.fillRect(player.x + 6, player.y + 6, 3, 3);
+        ctx.fillRect(player.x + player.w - 9, player.y + 6, 3, 3);
+        ctx.fillStyle = '#f0c9a6';
+        ctx.fillRect(player.x + 3, player.y + 16, 6, 10);
+        ctx.fillRect(player.x + player.w - 9, player.y + 16, 6, 10);
       }
 
       function draw() {
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        for (let y = 0; y < ROWS; y++) for (let x = 0; x < COLS; x++) drawTile(world[y][x], x, y);
-        const t = target();
-        if (inside(t.x, t.y)) {
-          ctx.strokeStyle = '#fff6a6'; ctx.lineWidth = 3; ctx.strokeRect(t.x * TILE + 2, t.y * TILE + 2, TILE - 4, TILE - 4);
+        const sky = ctx.createLinearGradient(0, 0, 0, canvas.height);
+        const dayWave = Math.sin(gameTime * 2.5);
+        const brightness = (dayWave + 1) / 2;
+        sky.addColorStop(0, `rgb(${Math.round(110 + 110 * brightness)}, ${Math.round(180 + 45 * brightness)}, ${Math.round(220 + 35 * brightness)})`);
+        sky.addColorStop(1, '#dff3ff');
+        ctx.fillStyle = sky; ctx.fillRect(0, 0, canvas.width, canvas.height);
+        const sunX = canvas.width * 0.85;
+        const sunY = 80 + (1 - brightness) * 80;
+        ctx.fillStyle = '#f9d765'; ctx.beginPath(); ctx.arc(sunX, sunY, 30, 0, Math.PI * 2); ctx.fill();
+
+        const cameraX = clamp(player.x - canvas.width / 2, 0, WORLD_W * TILE - canvas.width);
+        for (let y = 0; y < WORLD_H; y++) {
+          for (let x = 0; x < WORLD_W; x++) {
+            const tile = tileAt(x, y);
+            if (tile !== 'air') drawTile(tile, x, y, -cameraX);
+          }
         }
-        const px = player.x * TILE, py = player.y * TILE;
-        ctx.fillStyle = '#282d43'; ctx.fillRect(px + 8, py + 7, 16, 21);
-        ctx.fillStyle = '#f1bf8c'; ctx.fillRect(px + 9, py + 3, 14, 12);
-        ctx.fillStyle = '#202128'; ctx.fillRect(px + 12, py + 8, 2, 2); ctx.fillRect(px + 19, py + 8, 2, 2);
-        ctx.fillStyle = '#e9c94e'; ctx.fillRect(px + 7, py + 26, 7, 4); ctx.fillRect(px + 19, py + 26, 7, 4);
+
+        enemies.forEach(enemy => drawEnemy({ ...enemy, x: enemy.x - cameraX }));
+        drawPlayer();
+
+        ctx.fillStyle = 'rgba(0,0,0,0.3)';
+        ctx.fillRect(0, canvas.height - 28, canvas.width, 28);
+        ctx.fillStyle = '#fff';
+        ctx.font = 'bold 18px Trebuchet MS';
+        ctx.fillText(`X:${Math.round(player.x / TILE)}  Y:${Math.round(player.y / TILE)}  HP:${Math.ceil(player.health)}  Food:${Math.ceil(player.food)}`, 12, canvas.height - 8);
       }
 
-      function frame(now) {
-        if (now - lastStep > 130) {
-          let dx = 0, dy = 0;
-          if (held.has('arrowup') || held.has('w')) dy = -1;
-          else if (held.has('arrowdown') || held.has('s')) dy = 1;
-          else if (held.has('arrowleft') || held.has('a')) dx = -1;
-          else if (held.has('arrowright') || held.has('d')) dx = 1;
-          if (dx || dy) { step(dx, dy); lastStep = now; }
+      function drawTile(type, x, y, cameraOffsetX) {
+        const px = x * TILE - cameraOffsetX;
+        const py = y * TILE;
+        if (type === 'air') return;
+        if (type === 'grass') {
+          ctx.fillStyle = '#62a746'; ctx.fillRect(px, py, TILE, TILE);
+          ctx.fillStyle = '#8ad15d'; ctx.fillRect(px, py, TILE, 5);
+          return;
         }
-        if (now - saveTimer > 4000) { save(); saveTimer = now; }
-        draw(); requestAnimationFrame(frame);
+        if (type === 'dirt') { ctx.fillStyle = '#995e34'; ctx.fillRect(px, py, TILE, TILE); ctx.fillStyle = '#6a4221'; ctx.fillRect(px + 3, py + 8, TILE - 6, 4); return; }
+        if (type === 'stone') { ctx.fillStyle = '#7c8084'; ctx.fillRect(px, py, TILE, TILE); ctx.fillStyle = '#9ea4a7'; ctx.fillRect(px + 4, py + 4, 5, 4); ctx.fillRect(px + 16, py + 12, 6, 5); return; }
+        if (type === 'wood') { ctx.fillStyle = '#9a6430'; ctx.fillRect(px, py, TILE, TILE); ctx.fillStyle = '#694821'; ctx.fillRect(px + 10, py, 10, TILE); return; }
+        if (type === 'leaf') { ctx.fillStyle = '#30914a'; ctx.fillRect(px, py, TILE, TILE); ctx.fillStyle = '#54b95a'; ctx.fillRect(px + 4, py + 4, TILE - 8, TILE - 8); return; }
+        if (type === 'coal') { ctx.fillStyle = '#2d2f33'; ctx.fillRect(px, py, TILE, TILE); ctx.fillStyle = '#0e1014'; ctx.fillRect(px + 8, py + 9, 12, 12); return; }
+        if (type === 'apple') { ctx.fillStyle = '#d84546'; ctx.beginPath(); ctx.arc(px + TILE/2, py + TILE/2, 7, 0, Math.PI * 2); ctx.fill(); ctx.fillStyle = '#2b8d3e'; ctx.fillRect(px + TILE/2 - 2, py + 7, 3, 6); return; }
+        if (type === 'sand') { ctx.fillStyle = '#e6d488'; ctx.fillRect(px, py, TILE, TILE); ctx.fillStyle = '#d7b96d'; ctx.fillRect(px + 2, py + 2, 5, 5); return; }
+        if (type === 'torch') { ctx.fillStyle = '#5d3926'; ctx.fillRect(px + 14, py + 8, 4, 16); ctx.fillStyle = '#ffd551'; ctx.beginPath(); ctx.arc(px + TILE/2, py + 12, 8, 0, Math.PI * 2); ctx.fill(); return; }
+        if (type === 'campfire') { ctx.fillStyle = '#6d3c24'; ctx.fillRect(px + 4, py + 18, TILE - 8, 10); ctx.fillStyle = '#ff9041'; ctx.beginPath(); ctx.arc(px + TILE/2, py + TILE/2, 9, 0, Math.PI * 2); ctx.fill(); return; }
       }
 
-      document.addEventListener('keydown', (event) => {
-        const key = event.key.toLowerCase();
-        if (['arrowup', 'arrowdown', 'arrowleft', 'arrowright', ' '].includes(key)) event.preventDefault();
-        if (key === ' ' && !event.repeat) { mineFacing(); return; }
-        if (key === 'b' && !event.repeat) { place(); return; }
-        if (key >= '1' && key <= '5') { player.selected = Number(key) - 1; renderUi(); return; }
-        if (['arrowup', 'arrowdown', 'arrowleft', 'arrowright', 'w', 'a', 's', 'd'].includes(key)) held.add(key);
+      function step(dt) {
+        gameTime += dt * 0.0004;
+        player.day = Math.floor(gameTime) + 1;
+        player.food -= 0.0008 * dt;
+        if (player.food <= 0) player.health -= 0.008 * dt;
+        player.health = clamp(player.health, 0, 10);
+        if (player.health <= 0) {
+          player.health = 10; player.food = 5; player.x = 6 * TILE + 10; player.y = 5 * TILE + 10; player.vx = 0; player.vy = 0;
+        }
+        handleMovement(dt);
+        updateEnemies(dt);
+        if (Date.now() - lastSave > 2000) { saveGame(); lastSave = Date.now(); }
+        updateHud();
+      }
+
+      function tick(now) {
+        const dt = Math.min(16, now - (tick.last || now));
+        tick.last = now;
+        step(dt);
+        draw();
+        requestAnimationFrame(tick);
+      }
+      requestAnimationFrame(tick);
+
+      document.addEventListener('keydown', (e) => {
+        const key = e.key.toLowerCase();
+        if (['arrowleft', 'arrowright', 'arrowup', ' ', 'a', 'd', 'w', 's'].includes(key)) e.preventDefault();
+        if (key === ' ') {
+          if (!keys[key]) {
+            if (player.onGround) player.vy = -10.5;
+            touchMine();
+          }
+        }
+        if (key === 'b') placeSelectedBlock();
+        if (key >= '1' && key <= '5') player.selected = Number(key) - 1;
+        if (key === 'e') touchMine();
+        keys[key] = true;
       });
-      document.addEventListener('keyup', (event) => held.delete(event.key.toLowerCase()));
-      window.addEventListener('blur', () => held.clear());
+
+      document.addEventListener('keyup', (e) => { keys[e.key.toLowerCase()] = false; });
+      window.addEventListener('blur', () => { keys = {}; });
+
       canvas.addEventListener('click', (event) => {
         const rect = canvas.getBoundingClientRect();
-        const x = Math.floor(((event.clientX - rect.left) / rect.width) * COLS);
-        const y = Math.floor(((event.clientY - rect.top) / rect.height) * ROWS);
-        const dx = x - player.x, dy = y - player.y;
-        if (Math.abs(dx) + Math.abs(dy) === 1) { player.faceX = dx; player.faceY = dy; mine(x, y); }
-        else say('Click a block directly next to your character to mine it.');
-      });
-      document.querySelectorAll('[data-recipe]').forEach(button => button.addEventListener('click', () => craft(button.dataset.recipe)));
-      document.querySelector('#new-world').addEventListener('click', () => {
-        if (confirm('Start a new world? This replaces the saved world in this browser.')) setupNewWorld();
+        const mouseX = ((event.clientX - rect.left) / rect.width) * canvas.width;
+        const mouseY = ((event.clientY - rect.top) / rect.height) * canvas.height;
+        const worldX = Math.floor((mouseX + (player.x - canvas.width / 2)) / TILE);
+        const worldY = Math.floor(mouseY / TILE);
+        if (Math.abs(worldX - Math.floor((player.x + player.w/2)/TILE)) <= 1 && Math.abs(worldY - Math.floor((player.y + player.h/2)/TILE)) <= 1) {
+          mineBlockAtTile(worldX, worldY);
+        }
       });
 
-      const startTime = Date.now();
-      if (!load()) { makeWorld(); save(); }
-      renderUi();
-      requestAnimationFrame(frame);
+      document.querySelectorAll('[data-craft]').forEach(btn => {
+        btn.addEventListener('click', () => craft(btn.dataset.craft));
+      });
+      document.getElementById('newWorldBtn').addEventListener('click', () => {
+        if (confirm('Start a new world?')) newWorld();
+      });
+
+      if (!loadGame()) {
+        newWorld();
+      } else {
+        updateHud();
+      }
+      updateHud();
     })();
   </script>
 </body>
